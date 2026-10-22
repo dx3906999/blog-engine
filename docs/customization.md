@@ -15,7 +15,8 @@ npm run dev
 
 3. 替换 `content/` 下的示例内容。
 4. 在 `site.config.ts` 选择主题，或运行 `npm run setup` 重写配置。
-5. 推送 `main`，在仓库 Settings → Pages 选择 **GitHub Actions**。
+5. 把 `templates/deploy.yml` 复制到博客仓库的 `.github/workflows/deploy.yml`。
+6. 推送 `main`，在仓库 Settings → Pages 选择 **GitHub Actions**。
 
 `site.config.ts` 是提交进仓库的。`npm run setup` 覆盖前会生成 `site.config.ts.bak`。
 

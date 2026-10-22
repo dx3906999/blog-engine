@@ -1,6 +1,8 @@
 # blog-engine
 
-自研静态博客引擎。中文默认发布在站点根路径，英文在 `/en/`；主题可整体替换；构建时完成 Markdown、Shiki 代码高亮、KaTeX 公式和 Pagefind 索引；部署到 GitHub Pages。
+自研静态博客引擎。中文默认发布在站点根路径，英文在 `/en/`；主题可整体替换；构建时完成 Markdown、Shiki 代码高亮、KaTeX 公式和 Pagefind 索引。
+
+这个仓库是构建系统和示例站点，不是任何人的个人博客。`content/`、`site.config.ts` 和主题截图用于演示、测试和验证构建链；真正的博客仓库从模板创建，替换内容和配置。构建系统仓库本身只跑 CI，不部署站点。
 
 ![folio 主题首页](docs/screenshots/folio-home.png)
 
@@ -14,7 +16,7 @@
 - Pagefind 全文搜索，按语言过滤，排除代码和公式
 - KaTeX 构建时渲染，仅数学页面加载 CSS
 - 确定性构建、内部链接检查、SEO 检查、主题一致性测试
-- GitHub Actions 双平台 CI，artifact 部署 Pages，部署后 smoke test
+- 构建系统仓库跑 Ubuntu + Windows CI；博客实例通过 `templates/deploy.yml` 部署 Pages，部署后 smoke test
 
 ## 快速开始
 
@@ -131,12 +133,15 @@ npm run dev -- --theme=scholar
 
 主题目录包含 `theme.json`、`theme.ts`、`layouts/`、`assets/`、`i18n/`。新增主题的接口说明见 [docs/theming.md](docs/theming.md)，三套主题的截图见 [docs/theme-gallery.md](docs/theme-gallery.md)。
 
-## 部署到 GitHub Pages
+## 部署博客实例
 
-1. 创建 public 仓库，推送 `main`。
-2. Settings → Pages → Build and deployment → Source 选择 **GitHub Actions**。
-3. 推送代码；`.github/workflows/deploy.yml` 会完成校验、构建、Pagefind、上传 artifact 和部署。
-4. 部署后运行 smoke test，检查中英文首页、feed、sitemap、404 和搜索索引。
+构建系统仓库不部署自身。部署工作流是 `templates/deploy.yml`，由博客仓库复制后使用。
+
+1. 从 `blog-engine` 模板创建博客仓库（或用 “Use this template”）。
+2. 把 `templates/deploy.yml` 复制到博客仓库的 `.github/workflows/deploy.yml`。
+3. Settings → Pages → Build and deployment → Source 选择 **GitHub Actions**。
+4. 推送博客仓库的 `main`；工作流会完成校验、构建、Pagefind、上传 artifact 和部署。
+5. 部署后运行 smoke test，检查中英文首页、feed、sitemap、404 和搜索索引。
 
 项目页部署时，站点根是 `https://<user>.github.io/<repo>/`。`actions/configure-pages` 会注入 `origin` 和 `base_path`，不需要在配置里写仓库名。
 
@@ -150,8 +155,8 @@ GitHub Pages 没有服务端重定向和自定义响应头；站点总大小限�
 
 ## CI/CD
 
-- `.github/workflows/ci.yml`：PR 和 `main` 推送；Ubuntu + Windows；跑 `npm run check`、确定性检查、actionlint
-- `.github/workflows/deploy.yml`：只从 `main` 或手动触发；校验 → 主题检查 → `configure-pages` → 生产构建 → 输出检查 → Pagefind → 上传 artifact → 部署 → smoke test
+- `.github/workflows/ci.yml`：构建系统仓库的 CI；PR 和 `main` 推送；Ubuntu + Windows；跑 `npm run check`、确定性检查、actionlint
+- `templates/deploy.yml`：博客实例的部署模板，复制到博客仓库后使用；校验 → 主题检查 → `configure-pages` → 生产构建 → 输出检查 → Pagefind → 上传 artifact → 部署 → smoke test
 - `.github/workflows/external-links.yml`：每周检查内容里的外部链接
 - `.github/dependabot.yml`：每周更新 npm 和 GitHub Actions
 

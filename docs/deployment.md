@@ -1,12 +1,14 @@
-# 部署
+# 部署博客实例
 
-目标平台是 GitHub Pages。构建和部署都在 GitHub Actions 里完成，不提交 `dist/`。
+目标平台是 GitHub Pages。构建和部署都在博客仓库的 GitHub Actions 里完成，不提交 `dist/`。
+
+构建系统仓库（`blog-engine`）本身不部署。部署工作流放在 `templates/deploy.yml`，由博客仓库复制到 `.github/workflows/deploy.yml`。
 
 ## 首次部署
 
-1. 创建仓库并推送 `main`。免费计划下仓库必须是 public。
-2. 打开 Settings → Pages → Build and deployment → Source，选择 **GitHub Actions**。
-3. 确认 `.github/workflows/deploy.yml` 在 `main` 上。
+1. 从 `blog-engine` 模板创建博客仓库并推送 `main`。免费计划下仓库必须是 public。
+2. 把 `templates/deploy.yml` 复制到博客仓库的 `.github/workflows/deploy.yml`。
+3. 打开 Settings → Pages → Build and deployment → Source，选择 **GitHub Actions**。
 4. 推送一次提交，或在 Actions 里手动运行 **Deploy**。
 5. 部署完成后打开 `https://<user>.github.io/<repo>/`。
 

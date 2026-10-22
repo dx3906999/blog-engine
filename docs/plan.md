@@ -26,13 +26,13 @@ CI 覆盖类型检查、Lint、测试、构建、链接、SEO 和主题契约；
 - 开发服务器、预览服务器、`npm run new`
 - Pagefind 索引、按语言过滤、核心搜索脚本
 - 内部链接、SEO、确定性构建、主题一致性检查
-- CI、部署、外链检查工作流和 Dependabot 配置
+- CI、外链检查工作流、博客部署模板和 Dependabot 配置
 - README、写作/主题/配置/部署/架构/设计检查文档和 ADR
 
 待完成：
 
-- 创建 GitHub 远端仓库并开启 Pages（需要仓库地址和账号权限）
-- 首次生产部署与部署后 smoke test
+- 从 `blog-engine` 模板创建博客仓库并开启 Pages（构建系统仓库不部署自身）
+- 首次博客生产部署与部署后 smoke test
 - Lighthouse CI、外链失败 issue 流程（可选）
 - 生产域名的最终视觉验收
 
@@ -692,7 +692,7 @@ pagefind --site dist --output-subdir pagefind
 | 工作流 | 触发 | 作用 |
 |---|---|---|
 | `ci.yml` | PR、push main、手动 | 在 Ubuntu + Windows 上跑 `npm run check` |
-| `deploy.yml` | push main、手动 | 校验、生产构建、Pagefind、上传 artifact、部署 Pages、冒烟测试 |
+| `templates/deploy.yml` | 博客仓库复制后使用 | 校验、生产构建、Pagefind、上传 artifact、部署 Pages、冒烟测试 |
 | `external-links.yml` | 每周一、手动 | 外部链接检查，失败创建 issue（不阻塞 PR） |
 | Dependabot | 每周 | npm 与 GitHub Actions 更新 PR |
 
@@ -759,7 +759,9 @@ jobs:
           if-no-files-found: ignore
 ```
 
-### 5.3 `.github/workflows/deploy.yml`
+### 5.3 `templates/deploy.yml`
+
+构建系统仓库本身不运行这个工作流；博客仓库创建后复制到 `.github/workflows/deploy.yml`。
 
 ```yaml
 name: Deploy
