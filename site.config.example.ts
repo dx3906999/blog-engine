@@ -1,4 +1,4 @@
-import { defineConfig } from 'blog-engine/config'
+import { defineConfig } from 'endpaper/config'
 
 /**
  * Copy this file to site.config.ts, or run `npm run setup`.

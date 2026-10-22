@@ -27,7 +27,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npx --no-install blog-engine check:theme
+      - run: npx --no-install endpaper check:theme
       - id: pages
         uses: actions/configure-pages@v5
       - name: Build
@@ -35,10 +35,10 @@ jobs:
           SITE_URL: ${{ steps.pages.outputs.origin }}
           SITE_BASE: ${{ steps.pages.outputs.base_path }}
           SITE_ENV: production
-        run: npx --no-install blog-engine build
-      - run: npx --no-install blog-engine check:links
-      - run: npx --no-install blog-engine check:seo
-      - run: npx --no-install blog-engine index
+        run: npx --no-install endpaper build
+      - run: npx --no-install endpaper check:links
+      - run: npx --no-install endpaper check:seo
+      - run: npx --no-install endpaper index
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -63,4 +63,4 @@ jobs:
       - name: Post-deploy smoke test
         env:
           BASE_URL: ${{ steps.deployment.outputs.page_url }}
-        run: npx --no-install blog-engine smoke
+        run: npx --no-install endpaper smoke

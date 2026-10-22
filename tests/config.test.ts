@@ -7,7 +7,7 @@ import { loadConfig } from '../src/core/config.ts'
 const tempDirs: string[] = []
 
 async function fixture(source: string): Promise<string> {
-  const dir = await mkdtemp(path.join(os.tmpdir(), 'blog-engine-config-'))
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'endpaper-config-'))
   tempDirs.push(dir)
   await writeFile(path.join(dir, 'site.config.ts'), source, 'utf8')
   return dir
@@ -58,12 +58,23 @@ describe('config loading', () => {
   })
 
   it('rejects a base path that looks like a Windows path', async () => {
-    const root = await fixture(
-      baseConfig(`{
-        url: 'https://example.com',
-        base: 'C:/Users/demo/blog',
-      }`),
-    )
-    await expect(loadConfig({ root, production: false })).rejects.toThrow(/base must be a URL path/)
+    const previousUrl = process.env.SITE_URL
+    const previousBase = process.env.SITE_BASE
+    delete process.env.SITE_URL
+    delete process.env.SITE_BASE
+    try {
+      const root = await fixture(
+        baseConfig(`{
+          url: 'https://example.com',
+          base: 'C:/Users/demo/blog',
+        }`),
+      )
+      await expect(loadConfig({ root, production: false })).rejects.toThrow(
+        /base must be a URL path/,
+      )
+    } finally {
+      if (previousUrl !== undefined) process.env.SITE_URL = previousUrl
+      if (previousBase !== undefined) process.env.SITE_BASE = previousBase
+    }
   })
 })

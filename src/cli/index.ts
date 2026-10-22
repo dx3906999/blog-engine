@@ -37,10 +37,10 @@ const COMMANDS: Record<string, (argv: string[]) => Promise<void>> = {
 }
 
 function printHelp(): void {
-  console.log(`blog-engine
+  console.log(`endpaper
 
 Usage:
-  blog-engine <command> [options]
+  endpaper <command> [options]
 
 Commands:
   build              Build the site into dist/

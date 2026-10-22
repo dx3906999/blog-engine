@@ -1,4 +1,4 @@
-# blog-engine
+# endpaper
 
 自研静态博客引擎。中文默认发布在站点根路径，英文在 `/en/`；主题可整体替换；构建时完成 Markdown、Shiki 代码高亮、KaTeX 公式和 Pagefind 索引。
 
@@ -43,14 +43,14 @@ mkdir my-blog
 cd my-blog
 npm init -y
 npm install github:dx3906999/blog-engine
-npx blog-engine setup
-npx blog-engine dev
+npx endpaper setup
+npx endpaper dev
 ```
 
 `setup` 会生成 `site.config.ts`，询问作者、站点标题、英文站点信息、域名和主题。非交互使用：
 
 ```bash
-npx blog-engine setup --yes --force --name "Your Name" --url "https://example.com" --theme folio
+npx endpaper setup --yes --force --name "Your Name" --url "https://example.com" --theme folio
 ```
 
 博客仓库最终只需要：
@@ -63,7 +63,7 @@ package.json
 .github/workflows/deploy.yml
 ```
 
-引擎、主题、检查脚本和 Pagefind 都由 `blog-engine` 依赖提供。
+引擎、主题、检查脚本和 Pagefind 都由 `endpaper` 依赖提供。
 
 ## 博客仓库脚本
 
@@ -72,35 +72,35 @@ package.json
 ```json
 {
   "scripts": {
-    "dev": "blog-engine dev",
-    "build": "blog-engine build",
-    "build:all": "blog-engine check",
-    "preview": "blog-engine preview",
-    "new": "blog-engine new",
-    "clean": "blog-engine clean",
-    "setup": "blog-engine setup"
+    "dev": "endpaper dev",
+    "build": "endpaper build",
+    "build:all": "endpaper check",
+    "preview": "endpaper preview",
+    "new": "endpaper new",
+    "clean": "endpaper clean",
+    "setup": "endpaper setup"
   }
 }
 ```
 
 | 命令 | 作用 |
 | --- | --- |
-| `blog-engine dev` | 本地开发，监听内容、主题和配置 |
-| `blog-engine build` | 生成 `dist/`，不建搜索索引 |
-| `blog-engine check` | 构建、链接、SEO、主题一致性、Pagefind 索引 |
-| `blog-engine index` | 只重建 Pagefind 索引 |
-| `blog-engine preview` | 静态服务 `dist/` |
-| `blog-engine new "标题" --slug hello-world --lang zh` | 新建文章目录和 frontmatter |
-| `blog-engine check:deterministic` | 连续构建两次并比较产物 |
-| `blog-engine check:theme` | 用当前内容构建全部内置主题 |
-| `blog-engine clean` | 删除 `dist/`、缓存和开发产物 |
+| `endpaper dev` | 本地开发，监听内容、主题和配置 |
+| `endpaper build` | 生成 `dist/`，不建搜索索引 |
+| `endpaper check` | 构建、链接、SEO、主题一致性、Pagefind 索引 |
+| `endpaper index` | 只重建 Pagefind 索引 |
+| `endpaper preview` | 静态服务 `dist/` |
+| `endpaper new "标题" --slug hello-world --lang zh` | 新建文章目录和 frontmatter |
+| `endpaper check:deterministic` | 连续构建两次并比较产物 |
+| `endpaper check:theme` | 用当前内容构建全部内置主题 |
+| `endpaper clean` | 删除 `dist/`、缓存和开发产物 |
 
 生产预览：
 
 ```bash
-npx blog-engine build
-npx blog-engine index
-npx blog-engine preview
+npx endpaper build
+npx endpaper index
+npx endpaper preview
 ```
 
 构建系统仓库自己的开发脚本仍然是 `npm run dev`、`npm run check`、`npm run build:package`。
@@ -174,8 +174,8 @@ draft: false
 本地预览某套主题：
 
 ```bash
-npx blog-engine dev --theme=orbital
-npx blog-engine dev --theme=scholar
+npx endpaper dev --theme=orbital
+npx endpaper dev --theme=scholar
 ```
 
 主题目录包含 `theme.json`、`theme.ts`、`layouts/`、`assets/`、`i18n/`。新增主题的接口说明见 [docs/theming.md](docs/theming.md)，三套主题的截图见 [docs/theme-gallery.md](docs/theme-gallery.md)。
@@ -231,7 +231,7 @@ templates/deploy.yml 博客仓库部署模板
 content/            文章和页面
 public/             favicon、CNAME 等
 site.config.ts      站点配置
-package.json        依赖 blog-engine
+package.json        依赖 endpaper
 .github/workflows/deploy.yml
 ```
 

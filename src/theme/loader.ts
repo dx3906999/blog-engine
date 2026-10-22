@@ -38,7 +38,7 @@ export interface LoadedTheme {
 const require = createRequire(import.meta.url)
 
 function packageRoot(): string {
-  return path.dirname(require.resolve('blog-engine/package.json'))
+  return path.dirname(require.resolve('endpaper/package.json'))
 }
 
 function runningFromDist(): boolean {
@@ -106,7 +106,7 @@ export async function loadTheme(loaded: LoadedConfig, logger: Logger): Promise<L
   if (!themeDir) {
     throw new BuildError(`Theme "${loaded.config.theme.name}" was not found`, {
       code: 'THEME',
-      hint: 'it is neither in themes/ nor in the blog-engine built-in themes',
+      hint: 'it is neither in themes/ nor in the endpaper built-in themes',
     })
   }
   const manifestFile = path.join(themeDir, 'theme.json')
@@ -239,7 +239,7 @@ export async function copySearchAsset(
       ]
   const source = candidates.find((candidate) => existsSync(candidate))
   if (!source) {
-    throw new BuildError('search.js was not found in the blog-engine package', {
+    throw new BuildError('search.js was not found in the endpaper package', {
       code: 'THEME',
     })
   }
