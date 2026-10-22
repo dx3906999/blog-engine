@@ -49,3 +49,9 @@ jobs:
           path: dist
           retention-days: 3
           if-no-files-found: ignore
+      - name: Build npm package
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run build:package
+      - name: Verify package contents
+        if: matrix.os == 'ubuntu-latest'
+        run: npm pack --dry-run
