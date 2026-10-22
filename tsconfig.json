@@ -24,7 +24,8 @@
     "tests",
     "site.config.ts",
     "vitest.config.ts",
-    "tsup.config.ts"
+    "tsup.config.ts",
+    "tsup.dts.config.ts"
   ],
   "exclude": ["dist", "node_modules", ".cache", ".build-tmp"]
 }

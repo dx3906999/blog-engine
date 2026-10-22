@@ -109,15 +109,21 @@ function tagAlternates(
 function archiveAlternates(
   year: number | undefined,
   loaded: LoadedConfig,
+  content: ContentSet,
   languages: string[],
 ): Alternate[] {
   const defaultLang = loaded.config.locales.default
-  return languages.map((lang) => ({
-    lang,
-    label: loaded.config.locales.entries[lang]?.label ?? lang,
-    url: archivePath(lang, defaultLang, year),
-    title: year ? String(year) : (loaded.config.locales.entries[lang]?.title ?? lang),
-  }))
+  return languages.map((lang) => {
+    const hasYear =
+      year === undefined ||
+      (content.archivesByLang[lang] ?? []).some((group) => group.year === year)
+    return {
+      lang,
+      label: loaded.config.locales.entries[lang]?.label ?? lang,
+      url: hasYear ? archivePath(lang, defaultLang, year) : archivePath(lang, defaultLang),
+      title: year ? String(year) : (loaded.config.locales.entries[lang]?.title ?? lang),
+    }
+  })
 }
 
 export function buildTasks(loaded: LoadedConfig, content: ContentSet): RenderTask[] {
@@ -228,7 +234,7 @@ export function buildTasks(loaded: LoadedConfig, content: ContentSet): RenderTas
       titleKey: 'page.archives',
       description: locale.description,
       archives,
-      alternates: archiveAlternates(undefined, loaded, languages),
+      alternates: archiveAlternates(undefined, loaded, content, languages),
       lastmod: posts[0] ? isoDate(new Date(posts[0].timestamp), timezone) : undefined,
     })
 
@@ -243,7 +249,7 @@ export function buildTasks(loaded: LoadedConfig, content: ContentSet): RenderTas
         description: locale.description,
         archives: [group],
         posts: group.posts,
-        alternates: archiveAlternates(group.year, loaded, languages),
+        alternates: archiveAlternates(group.year, loaded, content, languages),
         lastmod: group.posts[0] ? isoDate(new Date(group.posts[0].timestamp), timezone) : undefined,
       })
     }
