@@ -30,7 +30,7 @@ jobs:
       - run: npm run verify
       - run: npm run check:theme -- themes/folio themes/orbital themes/scholar
       - id: pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Build
         env:
           SITE_URL: ${{ steps.pages.outputs.origin }}
