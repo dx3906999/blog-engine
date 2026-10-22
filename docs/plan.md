@@ -10,7 +10,7 @@
 
 用 Node.js 24+ / TypeScript 自研静态站点生成器（SSG）。中文为默认语言，发布在站点根路径；英文发布在 `/en/`，不生成 `/zh/`，不做浏览器语言自动跳转。内容为 Markdown + YAML frontmatter，构建时完成渲染、Shiki 代码高亮、KaTeX 公式和 Pagefind 全文索引。主题是可替换的 TS 模块，带独立配置、静态资源、多语言文案和一致性测试。
 
-站点身份全部配置化：作者、域名、仓库、语言、导航、许可证、主题都集中在 `site.config.ts`，不写死在代码或模板里。项目以 GitHub Template 的方式复用，其他人克隆后运行 `npm run setup` 填入自己的信息即可。内置三套完整主题：`folio`（编辑排版）、`orbital`（复古未来主义）、`scholar`（学术），不是换色皮肤。
+站点身份全部配置化：作者、域名、仓库、语言、导航、许可证、主题都集中在 `site.config.ts`，不写死在代码或模板里。引擎作为 npm 包发布，博客仓库安装 `blog-engine` 后运行 `blog-engine setup` 填入自己的信息即可。内置三套完整主题：`folio`（编辑排版）、`orbital`（复古未来主义）、`scholar`（学术），不是换色皮肤。
 
 CI 覆盖类型检查、Lint、测试、构建、链接、SEO 和主题契约；CD 通过 GitHub Actions artifact 发布到 GitHub Pages。预计 6 个阶段，按当前协作方式约 7–9 个批次完成。
 
@@ -18,7 +18,8 @@ CI 覆盖类型检查、Lint、测试、构建、链接、SEO 和主题契约；
 
 已完成：
 
-- 配置 schema、`site.config.ts` / `site.config.example.ts`、`npm run setup`
+- 引擎 npm 包化：单一 `blog-engine` bin、tsup 构建、内置主题随包发布、博客仓库只依赖包
+- 配置 schema、`site.config.ts` / `site.config.example.ts`、`blog-engine setup`
 - 内容扫描、frontmatter 校验、Markdown/Shiki/KaTeX 管线、Markdown 缓存
 - 路由、分页、标签、归档、Atom、sitemap、robots、404、manifest
 - 中文根路径 / 英文 `/en/`、译文关联、hreflang、语言切换器
@@ -46,7 +47,7 @@ CI 覆盖类型检查、Lint、测试、构建、链接、SEO 和主题契约；
 - 支持构建时 KaTeX 数学公式、Pagefind 全文搜索、暗色模式。
 - 主题可整体替换：目录、manifest、配置 schema、layouts、assets、i18n 五件套。
 - 内置三套完整主题：`folio`（编辑排版）、`orbital`（复古未来主义）、`scholar`（学术），每套有自己的排版系统和布局逻辑。
-- 站点身份、URL、语言、导航、许可证、主题选择全部配置化，不写死作者信息；项目可作为 GitHub Template 被其他人复用。
+- 站点身份、URL、语言、导航、许可证、主题选择全部配置化，不写死作者信息；博客仓库通过 npm 依赖 `blog-engine` 复用引擎。
 - 部署到 GitHub Pages，CI/CD 全自动，发布可回滚。
 - 本地开发在 Windows 上顺畅，CI 在 Linux 上复现同一结果。
 
@@ -81,7 +82,7 @@ CI 覆盖类型检查、Lint、测试、构建、链接、SEO 和主题契约；
 | 主题形态 | TS 模块（函数式布局），不是 EJS/Pug |
 | 内置主题 | `folio`（默认）、`orbital`、`scholar` |
 | 站点身份 | 全部在 `site.config.ts`，代码和主题中不写死作者/域名/仓库 |
-| 复用方式 | GitHub Template + `npm run setup` + `site.config.example.ts` |
+| 复用方式 | npm 依赖 `blog-engine` + `blog-engine setup` + `site.config.example.ts` |
 | 引擎包名 | 暂定 `blog-engine`，作为可复用引擎；站点实例靠配置区分 |
 | 搜索 | Pagefind，构建后扫描 `dist/` |
 | 数学 | KaTeX，构建时渲染 |
@@ -330,8 +331,8 @@ export default defineTheme({
 - 代码、主题、i18n 文案中不允许出现作者姓名、GitHub 用户名、仓库名、域名。
 - 主题只读取 `ctx.site.*`、`ctx.i18n.*`、`ctx.site.license` 等注入值。
 - 英文站点信息不是翻译中文，而是 `locales.entries.en` 下独立配置。
-- `site.config.example.ts` 提供完整注释和占位值；`npm run setup` 生成或更新 `site.config.ts`。
-- 项目仓库标记为 GitHub Template；README 首屏写 “Use this template”，新用户只改配置、内容和主题选择。
+- `site.config.example.ts` 提供完整注释和占位值；`blog-engine setup` 生成或更新 `site.config.ts`。
+- 博客仓库只安装 `blog-engine` 依赖，放 `content/`、`site.config.ts`、`public/` 和部署工作流；引擎和内置主题不复制。
 
 配置形态：
 
@@ -388,7 +389,7 @@ URL 与仓库解耦：
 文档与模板：
 
 - `docs/customization.md`：配置字段、语言、域名、主题切换、内容迁移。
-- `README.md`：三行快速开始 `npm ci` → `npm run setup` → `npm run dev`。
+- `README.md`：构建系统开发用 `npm ci` → `npm run dev`；博客实例用 `npm install github:dx3906999/blog-engine` → `blog-engine setup` → `blog-engine dev`。
 - `docs/authoring.md` 和 `docs/theming.md` 不出现当前作者的私人信息，示例使用中性作者名。
 - 内容目录附 `content/README.md`，说明哪些是示例、可以整体删除。
 
@@ -967,7 +968,7 @@ jobs:
 - 建立 `site.config.ts` 与 `site.config.example.ts`，定义完整的站点身份 schema；先提供最小可用的 `npm run setup`。
 - 最小 `build.ts` 输出一个带正确 base 的 `index.html`，并验证 `SITE_URL` / `SITE_BASE` 注入。
 - 写入 `ci.yml`、`deploy.yml`、`dependabot.yml`。
-- 创建 GitHub 仓库，标记为 Template，启用 Pages（Source: GitHub Actions）。
+- 创建 GitHub 仓库；构建系统仓库只跑 CI，不启用 Pages。
 - 写 `docs/customization.md` 骨架，确保新用户知道只改配置和内容。
 - **验收**：首次部署成功；项目页子路径下 HTML/CSS 正常；`npm run setup` 能从零生成有效配置；CI 在 Ubuntu 和 Windows 通过。
 
@@ -1077,7 +1078,7 @@ jobs:
 
 其他人复用时：
 
-- GitHub 上 “Use this template” → `npm ci` → `npm run setup` → 替换 `content/` → 选择主题 → push。
+- 创建博客仓库 → `npm install github:dx3906999/blog-engine` → `blog-engine setup` → 写 `content/` → 选择主题 → push。
 - 不需要改代码、主题模板或 CI 文件。
 - 使用自己的域名：在 setup 中填写，或设置 `customDomain`，构建生成 `CNAME`。
 

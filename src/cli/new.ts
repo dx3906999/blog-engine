@@ -2,7 +2,6 @@ import { access, mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { stringify as stringifyYaml } from 'yaml'
 import { loadConfig } from '../core/config.ts'
-import { formatError } from '../shared/errors.ts'
 import { parseArgs } from './args.ts'
 
 function zonedIso(date: Date, timeZone: string): string {
@@ -32,11 +31,11 @@ function slugify(value: string): string {
     .replace(/-+/g, '-')
 }
 
-async function main(): Promise<void> {
-  const args = parseArgs(process.argv.slice(2))
+export async function runNew(argv: string[] = process.argv.slice(2)): Promise<void> {
+  const args = parseArgs(argv)
   const title = args.positionals.join(' ').trim()
   if (!title) {
-    throw new Error('Usage: npm run new -- "Post title" --slug hello-world --lang zh')
+    throw new Error('Usage: blog-engine new "Post title" --slug hello-world --lang zh')
   }
 
   const loaded = await loadConfig({ root: process.cwd(), production: false })
@@ -86,8 +85,3 @@ async function main(): Promise<void> {
   await writeFile(path.join(dir, 'index.md'), body, 'utf8')
   console.log(`created content/${lang}/posts/${slug}/index.md`)
 }
-
-main().catch((error: unknown) => {
-  console.error(formatError(error))
-  process.exit(1)
-})

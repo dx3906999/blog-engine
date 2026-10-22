@@ -2,7 +2,7 @@ import type { Stats } from 'node:fs'
 import { access, readdir, readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
 import { load } from 'cheerio'
-import { decodePath, isExternal, stripBase } from '../src/shared/url.ts'
+import { decodePath, isExternal, stripBase } from '../shared/url.ts'
 
 interface Manifest {
   base: string
@@ -54,7 +54,7 @@ function targetFile(root: string, sourceFile: string, hrefPath: string, base: st
   return target
 }
 
-async function main(): Promise<void> {
+export async function runCheckLinks(): Promise<void> {
   const root = path.resolve('dist')
   const manifest = JSON.parse(
     await readFile(path.join(root, 'build-manifest.json'), 'utf8'),
@@ -136,8 +136,3 @@ async function main(): Promise<void> {
   }
   console.log(`link check: ${checked} links across ${files.length} pages`)
 }
-
-main().catch((error: unknown) => {
-  console.error(error)
-  process.exit(1)
-})

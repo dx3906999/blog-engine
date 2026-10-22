@@ -1,4 +1,4 @@
-import { html, type LayoutFn } from 'blog-engine/theme'
+import { html, type LayoutFn } from '../../../src/theme/api.ts'
 import { baseLayout } from './base.ts'
 import { archiveList, pageHeader, postList } from './components.ts'
 

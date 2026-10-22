@@ -1,4 +1,4 @@
-import type { ThemeContext } from 'blog-engine/theme'
+import type { ThemeContext } from '../../src/theme/api.ts'
 
 export interface ScholarConfig {
   accent: string

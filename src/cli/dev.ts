@@ -12,14 +12,15 @@ interface BuildRun {
   output: string
 }
 
-function runBuild(
+function runChildBuild(
+  cliEntry: string,
   root: string,
   base: string,
   theme: string | undefined,
   outDir: string,
 ): Promise<BuildRun> {
   return new Promise((resolve, reject) => {
-    const args = [path.join(root, 'src', 'cli', 'build.ts'), '--dev', `--out=${outDir}`]
+    const args = [cliEntry, 'build', '--dev', `--out=${outDir}`]
     if (base && base !== '/') args.push(`--base=${base}`)
     if (theme) args.push(`--theme=${theme}`)
     const child = spawn(process.execPath, args, {
@@ -38,10 +39,13 @@ function runBuild(
   })
 }
 
-async function main(): Promise<void> {
-  const args = parseArgs(process.argv.slice(2))
+export async function runDev(argv: string[] = process.argv.slice(2)): Promise<void> {
+  const args = parseArgs(argv)
   const logger = new Logger(args.flags.has('--verbose') ? 'debug' : 'info')
   const root = process.cwd()
+  const cliEntry = process.argv[1]
+  if (!cliEntry) throw new Error('Unable to locate the blog-engine CLI entry')
+
   const baseOverride = args.options.get('--base')
   const theme = args.options.get('--theme')
   const loaded = await loadConfig({
@@ -53,7 +57,7 @@ async function main(): Promise<void> {
 
   const port = Number(args.options.get('--port') ?? 4000)
   const outDir = path.join('.dev-dist', String(port))
-  const initial = await runBuild(root, loaded.config.site.base, theme, outDir)
+  const initial = await runChildBuild(cliEntry, root, loaded.config.site.base, theme, outDir)
   if (initial.code !== 0) {
     console.error(initial.output)
     process.exit(1)
@@ -66,7 +70,7 @@ async function main(): Promise<void> {
     dev: true,
   })
   logger.info(`dev: ${server.url}`)
-  logger.info('watching content/, themes/, src/, public/, site.config.ts')
+  logger.info('watching content/, themes/, public/, i18n/, site.config.ts')
 
   let timer: NodeJS.Timeout | undefined
   let building = false
@@ -79,7 +83,7 @@ async function main(): Promise<void> {
     }
     building = true
     try {
-      const result = await runBuild(root, loaded.config.site.base, theme, outDir)
+      const result = await runChildBuild(cliEntry, root, loaded.config.site.base, theme, outDir)
       if (result.code === 0) {
         logger.info('rebuilt')
         server.broadcastReload()
@@ -103,7 +107,6 @@ async function main(): Promise<void> {
     [
       path.join(root, 'content'),
       path.join(root, 'themes'),
-      path.join(root, 'src'),
       path.join(root, 'public'),
       path.join(root, 'i18n'),
       path.join(root, 'site.config.ts'),
@@ -135,8 +138,3 @@ async function main(): Promise<void> {
   process.on('SIGINT', shutdown)
   process.on('SIGTERM', shutdown)
 }
-
-main().catch((error: unknown) => {
-  console.error(formatError(error))
-  process.exit(1)
-})

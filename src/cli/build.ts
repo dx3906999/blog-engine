@@ -1,12 +1,11 @@
 import path from 'node:path'
 import { buildSite } from '../core/build.ts'
 import { loadConfig } from '../core/config.ts'
-import { formatError } from '../shared/errors.ts'
 import { Logger } from '../shared/logger.ts'
 import { parseArgs } from './args.ts'
 
-async function main(): Promise<void> {
-  const args = parseArgs(process.argv.slice(2))
+export async function runBuild(argv: string[] = process.argv.slice(2)): Promise<void> {
+  const args = parseArgs(argv)
   const logger = new Logger(args.flags.has('--verbose') ? 'debug' : 'info')
   const root = process.cwd()
   const dev = args.flags.has('--dev')
@@ -33,8 +32,3 @@ async function main(): Promise<void> {
     `built ${result.posts} posts, ${result.pages} pages, ${result.tasks.length} routes in ${result.durationMs}ms -> ${relative}`,
   )
 }
-
-main().catch((error: unknown) => {
-  console.error(formatError(error))
-  process.exit(1)
-})

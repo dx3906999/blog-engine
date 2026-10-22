@@ -1,8 +1,9 @@
 import { createHash } from 'node:crypto'
+import { existsSync } from 'node:fs'
 import { access, copyFile, cp, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import path from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { z } from 'zod'
 import type { LoadedConfig } from '../core/config.ts'
 import type { PageItem, PageKind, Post } from '../core/types.ts'
@@ -36,6 +37,43 @@ export interface LoadedTheme {
 
 const require = createRequire(import.meta.url)
 
+function packageRoot(): string {
+  return path.dirname(require.resolve('blog-engine/package.json'))
+}
+
+function runningFromDist(): boolean {
+  return fileURLToPath(import.meta.url).includes(`${path.sep}dist${path.sep}`)
+}
+
+function builtInThemesRoot(): string {
+  return runningFromDist()
+    ? path.join(packageRoot(), 'dist', 'themes')
+    : path.join(packageRoot(), 'themes')
+}
+
+export async function listThemeNames(root: string): Promise<string[]> {
+  const names = new Set<string>()
+
+  const add = async (dir: string): Promise<void> => {
+    if (!(await pathExists(dir))) return
+    for (const entry of await readdir(dir, { withFileTypes: true })) {
+      if (entry.isDirectory()) names.add(entry.name)
+    }
+  }
+
+  await add(builtInThemesRoot())
+  await add(path.join(root, 'themes'))
+  return [...names].sort()
+}
+
+export async function resolveThemeDir(root: string, name: string): Promise<string | undefined> {
+  const siteTheme = path.join(root, 'themes', name)
+  if (await pathExists(siteTheme)) return siteTheme
+  const builtInTheme = path.join(builtInThemesRoot(), name)
+  if (await pathExists(builtInTheme)) return builtInTheme
+  return undefined
+}
+
 async function pathExists(target: string): Promise<boolean> {
   try {
     await access(target)
@@ -64,7 +102,13 @@ function hashBuffer(buffer: Buffer): string {
 }
 
 export async function loadTheme(loaded: LoadedConfig, logger: Logger): Promise<LoadedTheme> {
-  const themeDir = path.join(loaded.root, 'themes', loaded.config.theme.name)
+  const themeDir = await resolveThemeDir(loaded.root, loaded.config.theme.name)
+  if (!themeDir) {
+    throw new BuildError(`Theme "${loaded.config.theme.name}" was not found`, {
+      code: 'THEME',
+      hint: 'it is neither in themes/ nor in the blog-engine built-in themes',
+    })
+  }
   const manifestFile = path.join(themeDir, 'theme.json')
   let manifestSource: string
   try {
@@ -179,8 +223,26 @@ export async function copyThemeAssets(
   return map
 }
 
-export async function copySearchAsset(root: string, outDir: string, base: string): Promise<string> {
-  const source = path.join(root, 'src', 'assets', 'search.js')
+export async function copySearchAsset(
+  _root: string,
+  outDir: string,
+  base: string,
+): Promise<string> {
+  const candidates = runningFromDist()
+    ? [
+        path.join(packageRoot(), 'dist', 'src', 'assets', 'search.js'),
+        path.join(packageRoot(), 'src', 'assets', 'search.js'),
+      ]
+    : [
+        path.join(packageRoot(), 'src', 'assets', 'search.js'),
+        path.join(packageRoot(), 'dist', 'src', 'assets', 'search.js'),
+      ]
+  const source = candidates.find((candidate) => existsSync(candidate))
+  if (!source) {
+    throw new BuildError('search.js was not found in the blog-engine package', {
+      code: 'THEME',
+    })
+  }
   const buffer = await readFile(source)
   const destination = path.join(outDir, 'assets', 'search.js')
   await mkdir(path.dirname(destination), { recursive: true })

@@ -1,9 +1,10 @@
 import { access, readdir, readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { load } from 'cheerio'
-import { buildSite } from '../src/core/build.ts'
-import { loadConfig } from '../src/core/config.ts'
-import { Logger } from '../src/shared/logger.ts'
+import { buildSite } from '../core/build.ts'
+import { loadConfig } from '../core/config.ts'
+import { Logger } from '../shared/logger.ts'
+import { listThemeNames, resolveThemeDir } from '../theme/loader.ts'
 
 async function exists(file: string): Promise<boolean> {
   try {
@@ -28,23 +29,19 @@ async function walk(dir: string, result: string[] = []): Promise<string[]> {
   return result
 }
 
-async function themesFromDisk(root: string): Promise<string[]> {
-  const entries = await readdir(path.join(root, 'themes'), { withFileTypes: true })
-  return entries
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .sort()
-}
-
-async function main(): Promise<void> {
+export async function runCheckTheme(argv: string[] = process.argv.slice(2)): Promise<void> {
   const root = process.cwd()
-  const requested = process.argv.slice(2).filter((arg) => !arg.startsWith('--'))
-  const themes = requested.length > 0 ? requested : await themesFromDisk(root)
+  const requested = argv.filter((arg) => !arg.startsWith('--'))
+  const themes = requested.length > 0 ? requested : await listThemeNames(root)
   const logger = new Logger('warn')
   const errors: string[] = []
 
   for (const theme of themes) {
-    const themeDir = path.join(root, 'themes', theme)
+    const themeDir = await resolveThemeDir(root, theme)
+    if (!themeDir) {
+      errors.push(`${theme}: theme directory not found`)
+      continue
+    }
     const manifestFile = path.join(themeDir, 'theme.json')
     if (!(await exists(manifestFile))) {
       errors.push(`${theme}: missing theme.json`)
@@ -137,8 +134,3 @@ async function main(): Promise<void> {
   }
   console.log(`theme check: ${themes.join(', ')}`)
 }
-
-main().catch((error: unknown) => {
-  console.error(error)
-  process.exit(1)
-})

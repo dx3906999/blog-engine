@@ -1,4 +1,4 @@
-import { html, type Post, type ThemeContext } from 'blog-engine/theme'
+import { html, type Post, type ThemeContext } from '../../../src/theme/api.ts'
 import { getFolioConfig } from '../config.ts'
 
 export function postMeta(ctx: ThemeContext, post: Post) {

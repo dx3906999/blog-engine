@@ -2,6 +2,8 @@
 
 主题是独立目录，核心只负责内容、路由和渲染数据，主题负责把数据变成 HTML。
 
+`folio`、`orbital`、`scholar` 随 `blog-engine` 包发布。博客仓库不需要复制它们；把自定义主题放在博客仓库的 `themes/<name>/`，同名主题会覆盖内置主题。
+
 ## 目录
 
 ```
@@ -122,6 +124,7 @@ export const post: LayoutFn = (ctx) => html`
 
 - `assets/` 会复制到 `dist/assets/<theme>/`。
 - `asset('css/extra.css')` 返回带 `base` 和内容哈希的 URL。
+- 内置主题的 `assets/` 和 `i18n/` 由包的构建步骤复制到 `dist/themes/<name>/`。
 - 资源缺失会抛 `THEME` 错误，不会静默输出坏链接。
 - 主题 JS 写成原生 ESM；不要依赖打包器。
 - 主题 CSS 使用普通 CSS；需要预处理器时在发布前自行编译。
@@ -142,7 +145,7 @@ toc.title
 ## 一致性测试
 
 ```bash
-npm run check:theme -- themes/my-theme
+npx blog-engine check:theme -- themes/my-theme
 ```
 
 不传参数时遍历 `themes/` 下所有主题。测试会用固定内容构建，检查：
@@ -160,7 +163,7 @@ npm run check:theme -- themes/my-theme
 2. 修改 `theme.json` 的 `name`，修改 `theme.ts` 的配置 schema 和布局。
 3. 在 `assets/css/site.css` 建立自己的排版系统。
 4. 在 `i18n/` 补齐中英文。
-5. 运行 `npm run check:theme -- themes/<name>`。
+5. 运行 `npx blog-engine check:theme -- themes/<name>`。
 6. 用 360 / 768 / 1280 / 1440 宽度和亮/暗模式检查截图。
 7. 把截图和设计定位加到 `docs/theme-gallery.md`。
 

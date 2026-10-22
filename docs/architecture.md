@@ -14,15 +14,21 @@ site.config.ts
   → Pagefind 建索引（独立命令）
 ```
 
+## 包与博客实例
+
+`blog-engine` 是可安装的 npm 包。构建时用 tsup 把 CLI、主题 API、配置 API 和三套内置主题编译到 `dist/`；主题的 `assets/`、`i18n/` 和 `search.js` 复制到对应位置。博客仓库只安装这个包，放 `content/`、`site.config.ts`、`public/` 和部署工作流。
+
+内置主题从包的 `dist/themes/` 解析；博客仓库的 `themes/<name>/` 优先，可用于覆盖或新增主题。博客仓库不需要 `src/`、`themes/`、`scripts/` 或测试。
+
 ## 模块边界
 
 - `src/core`：纯内容和路由逻辑，不读环境变量、不打印日志、不写文件（除了 Markdown 缓存）。
-- `src/cli`：参数解析、I/O、开发服务器、退出码。
+- `src/cli`：参数解析、I/O、开发服务器、检查、Pagefind、退出码。`src/cli/index.ts` 是唯一的 bin 入口。
 - `src/theme`：主题加载、配置校验、i18n、资源复制、主题 API。
-- `scripts`：CI 和发布使用的独立校验工具。
+- `scripts`：包构建时复制静态资源。
 - `themes/*`：只负责 HTML，不改 URL、不改路由。
 
-`core` 不 import 主题内部文件；主题只 import `blog-engine/theme` 的公共 API。
+`core` 不 import 主题内部文件；外部主题 import `blog-engine/theme` 的公共 API。
 
 ## 内容模型
 

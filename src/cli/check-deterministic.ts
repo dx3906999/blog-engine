@@ -1,9 +1,9 @@
 import { createHash } from 'node:crypto'
 import { readdir, readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
-import { buildSite } from '../src/core/build.ts'
-import { loadConfig } from '../src/core/config.ts'
-import { Logger } from '../src/shared/logger.ts'
+import { buildSite } from '../core/build.ts'
+import { loadConfig } from '../core/config.ts'
+import { Logger } from '../shared/logger.ts'
 
 async function walk(dir: string, prefix = ''): Promise<string[]> {
   const entries = await readdir(path.join(dir, prefix), { withFileTypes: true })
@@ -28,7 +28,7 @@ async function hashes(dir: string): Promise<Map<string, string>> {
   return map
 }
 
-async function main(): Promise<void> {
+export async function runCheckDeterministic(): Promise<void> {
   const root = process.cwd()
   const logger = new Logger('warn')
   const loaded = await loadConfig({ root, production: false })
@@ -61,8 +61,3 @@ async function main(): Promise<void> {
   }
   console.log(`deterministic check: ${a?.size ?? 0} files identical across two builds`)
 }
-
-main().catch((error: unknown) => {
-  console.error(error)
-  process.exit(1)
-})

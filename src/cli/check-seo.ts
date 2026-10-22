@@ -2,7 +2,7 @@ import { access, readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { load } from 'cheerio'
 import { XMLParser } from 'fast-xml-parser'
-import { decodePath, stripBase } from '../src/shared/url.ts'
+import { decodePath, stripBase } from '../shared/url.ts'
 
 interface Manifest {
   base: string
@@ -52,7 +52,7 @@ function fileForUrl(root: string, manifest: Manifest, loc: string): string | und
   return path.join(root, pathname.replace(/^\/+/, ''))
 }
 
-async function main(): Promise<void> {
+export async function runCheckSeo(): Promise<void> {
   const root = path.resolve('dist')
   const manifest = JSON.parse(
     await readFile(path.join(root, 'build-manifest.json'), 'utf8'),
@@ -190,8 +190,3 @@ async function main(): Promise<void> {
   }
   console.log(`seo check: ${files.length} pages, ${urls.length} sitemap urls`)
 }
-
-main().catch((error: unknown) => {
-  console.error(error)
-  process.exit(1)
-})

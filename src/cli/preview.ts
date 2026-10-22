@@ -1,11 +1,10 @@
 import { loadConfig } from '../core/config.ts'
-import { formatError } from '../shared/errors.ts'
 import { Logger } from '../shared/logger.ts'
 import { parseArgs } from './args.ts'
 import { startStaticServer } from './server.ts'
 
-async function main(): Promise<void> {
-  const args = parseArgs(process.argv.slice(2))
+export async function runPreview(argv: string[] = process.argv.slice(2)): Promise<void> {
+  const args = parseArgs(argv)
   const logger = new Logger()
   const loaded = await loadConfig({
     root: process.cwd(),
@@ -27,8 +26,3 @@ async function main(): Promise<void> {
   process.on('SIGINT', shutdown)
   process.on('SIGTERM', shutdown)
 }
-
-main().catch((error: unknown) => {
-  console.error(formatError(error))
-  process.exit(1)
-})

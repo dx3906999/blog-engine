@@ -1,29 +1,50 @@
 # 配置与复用
 
-这个仓库按“引擎 + 站点实例”组织。引擎代码和主题不包含作者名、GitHub 用户名、仓库名或域名；这些都在 `site.config.ts`。
+这个项目按“引擎包 + 博客实例”组织。`blog-engine` 是 npm 包，博客仓库只放内容、配置和 `public/`；作者名、域名、仓库名都在博客仓库的 `site.config.ts`。
 
-## 作为模板使用
-
-1. 在 GitHub 上点击 **Use this template**，创建自己的仓库。
-2. 克隆后运行：
+## 创建博客仓库
 
 ```bash
-npm ci
-npm run setup
-npm run dev
+mkdir my-blog
+cd my-blog
+npm init -y
+npm install github:dx3906999/blog-engine
+npx blog-engine setup
+npx blog-engine dev
 ```
 
-3. 替换 `content/` 下的示例内容。
-4. 在 `site.config.ts` 选择主题，或运行 `npm run setup` 重写配置。
-5. 把 `templates/deploy.yml` 复制到博客仓库的 `.github/workflows/deploy.yml`。
-6. 推送 `main`，在仓库 Settings → Pages 选择 **GitHub Actions**。
+博客仓库需要的文件：
 
-`site.config.ts` 是提交进仓库的。`npm run setup` 覆盖前会生成 `site.config.ts.bak`。
+```
+content/
+public/
+site.config.ts
+package.json
+.github/workflows/deploy.yml
+```
+
+`blog-engine setup` 会生成 `site.config.ts`，并在覆盖前生成 `site.config.ts.bak`。把引擎仓库的 `templates/deploy.yml` 复制到博客仓库的 `.github/workflows/deploy.yml`，然后在 Pages 里选择 **GitHub Actions**。
+
+在博客仓库的 `package.json` 加脚本：
+
+```json
+{
+  "scripts": {
+    "dev": "blog-engine dev",
+    "build": "blog-engine build",
+    "build:all": "blog-engine check",
+    "preview": "blog-engine preview",
+    "new": "blog-engine new",
+    "clean": "blog-engine clean",
+    "setup": "blog-engine setup"
+  }
+}
+```
 
 ## 非交互配置
 
 ```bash
-npm run setup -- --yes --force \
+npx blog-engine setup --yes --force \
   --name "Your Name" \
   --email "you@example.com" \
   --github "https://github.com/you" \
@@ -84,7 +105,7 @@ theme: {
 ## 站点路径
 
 - 用户页/组织页 `https://user.github.io`：`site.base: '/'`
-- 项目页 `https://user.github.io/repo`：CI 自动注入 `SITE_BASE=/repo`；本地模拟用 `npm run dev -- --base=/repo/`。Windows Git Bash 需要加 `MSYS_NO_PATHCONV=1`，否则 `/repo/` 会被转换成 Windows 路径。
+- 项目页 `https://user.github.io/repo`：CI 自动注入 `SITE_BASE=/repo`；本地模拟用 `npx blog-engine dev --base=/repo/`。Windows Git Bash 需要加 `MSYS_NO_PATHCONV=1`，否则 `/repo/` 会被转换成 Windows 路径。
 - 自定义域名：`site.base: '/'`，`site.url` 是域名 origin
 
 所有内部链接都经过 helper。主题里不要写死 `/assets/...` 或 `/posts/...`。
@@ -100,7 +121,7 @@ theme: { name: 'scholar', config: {} }
 或者临时预览：
 
 ```bash
-npm run dev -- --theme=scholar
+npx blog-engine dev --theme=scholar
 ```
 
 主题名必须在 `themes/` 下存在。新增主题见 [theming.md](theming.md)。
@@ -116,7 +137,7 @@ content/en/posts/how-this-site-works/
 content/en/posts/typography-notes/
 ```
 
-删除这些目录后，保留或改写 `content/zh/pages/about.md` 和 `content/en/pages/about.md`，再运行 `npm run build:all`。
+删除这些目录后，保留或改写 `content/zh/pages/about.md` 和 `content/en/pages/about.md`，再运行 `npx blog-engine check`。
 
 ## 仓库改名
 

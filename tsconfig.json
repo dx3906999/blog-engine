@@ -17,6 +17,14 @@
     "resolveJsonModule": true,
     "types": ["node"]
   },
-  "include": ["src", "scripts", "themes", "tests", "site.config.ts", "vitest.config.ts"],
+  "include": [
+    "src",
+    "scripts",
+    "themes",
+    "tests",
+    "site.config.ts",
+    "vitest.config.ts",
+    "tsup.config.ts"
+  ],
   "exclude": ["dist", "node_modules", ".cache", ".build-tmp"]
 }

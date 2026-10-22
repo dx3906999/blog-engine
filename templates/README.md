@@ -4,9 +4,10 @@
 
 创建博客仓库后：
 
-1. 复制 `templates/deploy.yml` 到博客仓库的 `.github/workflows/deploy.yml`。
-2. 在博客仓库 Settings → Pages → Source 选择 **GitHub Actions**。
-3. 推送 `main`，或手动运行 **Deploy**。
-4. 首次部署后检查 Actions 里的 smoke test。
+1. `npm install github:dx3906999/blog-engine`。
+2. 复制 `templates/deploy.yml` 到博客仓库的 `.github/workflows/deploy.yml`。
+3. 在博客仓库 Settings → Pages → Source 选择 **GitHub Actions**。
+4. 推送 `main`，或手动运行 **Deploy**。
+5. 首次部署后检查 Actions 里的 smoke test。
 
 `deploy.yml` 会从 `actions/configure-pages` 获取 `origin` 和 `base_path`，写入 `SITE_URL` / `SITE_BASE`，因此项目页和自定义域名都不需要改代码。

@@ -1,4 +1,4 @@
-import { html, type LayoutFn } from 'blog-engine/theme'
+import { html, type LayoutFn } from '../../../src/theme/api.ts'
 import { baseLayout } from './base.ts'
 
 export const notFound: LayoutFn = (ctx) => {

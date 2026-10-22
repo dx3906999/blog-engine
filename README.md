@@ -2,7 +2,7 @@
 
 自研静态博客引擎。中文默认发布在站点根路径，英文在 `/en/`；主题可整体替换；构建时完成 Markdown、Shiki 代码高亮、KaTeX 公式和 Pagefind 索引。
 
-这个仓库是构建系统和示例站点，不是任何人的个人博客。`content/`、`site.config.ts` 和主题截图用于演示、测试和验证构建链；真正的博客仓库从模板创建，替换内容和配置。构建系统仓库本身只跑 CI，不部署站点。
+这个仓库是可安装的构建系统包，不是任何人的个人博客。`content/`、`site.config.ts` 和主题截图只用于演示、测试和验证构建链；博客仓库只保留 `content/`、`site.config.ts`、`public/`、`package.json` 和部署工作流。构建系统仓库本身只跑 CI，不部署站点。
 
 ![folio 主题首页](docs/screenshots/folio-home.png)
 
@@ -18,45 +18,92 @@
 - 确定性构建、内部链接检查、SEO 检查、主题一致性测试
 - 构建系统仓库跑 Ubuntu + Windows CI；博客实例通过 `templates/deploy.yml` 部署 Pages，部署后 smoke test
 
-## 快速开始
+## 构建系统开发
 
-需要 Node.js 24 或更高版本。
+需要 Node.js 24 或更高版本。仓库里的 `content/` 是演示/测试站点。
 
 ```bash
 npm ci
-npm run setup
 npm run dev
+npm run check
 ```
 
-`setup` 会询问作者、站点标题、英文站点信息、域名和主题，并写入 `site.config.ts`。非交互使用：
+修改 `src/`、`themes/` 或演示内容会触发 dev server 重建。构建 npm 包：
 
 ```bash
-npm run setup -- --yes --force --name "Your Name" --url "https://example.com" --theme folio
+npm run build:package
 ```
 
-打开 `http://localhost:4000/`。修改 `content/` 下的文件会触发重建和页面刷新。
+## 创建博客仓库
 
-## 常用脚本
+博客仓库不需要复制 `src/` 或 `themes/`，只安装引擎并放内容：
+
+```bash
+mkdir my-blog
+cd my-blog
+npm init -y
+npm install github:dx3906999/blog-engine
+npx blog-engine setup
+npx blog-engine dev
+```
+
+`setup` 会生成 `site.config.ts`，询问作者、站点标题、英文站点信息、域名和主题。非交互使用：
+
+```bash
+npx blog-engine setup --yes --force --name "Your Name" --url "https://example.com" --theme folio
+```
+
+博客仓库最终只需要：
+
+```
+content/
+public/
+site.config.ts
+package.json
+.github/workflows/deploy.yml
+```
+
+引擎、主题、检查脚本和 Pagefind 都由 `blog-engine` 依赖提供。
+
+## 博客仓库脚本
+
+在博客仓库的 `package.json` 里加：
+
+```json
+{
+  "scripts": {
+    "dev": "blog-engine dev",
+    "build": "blog-engine build",
+    "build:all": "blog-engine check",
+    "preview": "blog-engine preview",
+    "new": "blog-engine new",
+    "clean": "blog-engine clean",
+    "setup": "blog-engine setup"
+  }
+}
+```
 
 | 命令 | 作用 |
 | --- | --- |
-| `npm run dev` | 本地开发，监听内容、主题和配置 |
-| `npm run build` | 生成 `dist/`，不建搜索索引 |
-| `npm run build:all` | 生成站点、跑输出检查、建 Pagefind 索引 |
-| `npm run build:finish` | 对已有 `dist/` 做链接/SEO 检查并建索引 |
-| `npm run preview` | 静态服务 `dist/`，用于验收 |
-| `npm run new -- "标题" --slug hello-world --lang zh` | 新建文章目录和 frontmatter |
-| `npm run check` | 本地/CI 默认门禁：Lint、类型、测试、构建、链接、SEO、主题、索引 |
-| `npm run check:deterministic` | 连续构建两次并比较产物 |
-| `npm run check:theme` | 对全部主题做一致性测试 |
-| `npm run clean` | 删除 `dist/`、缓存和开发产物 |
+| `blog-engine dev` | 本地开发，监听内容、主题和配置 |
+| `blog-engine build` | 生成 `dist/`，不建搜索索引 |
+| `blog-engine check` | 构建、链接、SEO、主题一致性、Pagefind 索引 |
+| `blog-engine index` | 只重建 Pagefind 索引 |
+| `blog-engine preview` | 静态服务 `dist/` |
+| `blog-engine new "标题" --slug hello-world --lang zh` | 新建文章目录和 frontmatter |
+| `blog-engine check:deterministic` | 连续构建两次并比较产物 |
+| `blog-engine check:theme` | 用当前内容构建全部内置主题 |
+| `blog-engine clean` | 删除 `dist/`、缓存和开发产物 |
 
 生产预览：
 
 ```bash
-npm run build:all
-npm run preview
+npx blog-engine build
+npx blog-engine index
+npx blog-engine preview
 ```
+
+构建系统仓库自己的开发脚本仍然是 `npm run dev`、`npm run check`、`npm run build:package`。
 
 ## 站点配置
 
@@ -127,8 +174,8 @@ draft: false
 本地预览某套主题：
 
 ```bash
-npm run dev -- --theme=orbital
-npm run dev -- --theme=scholar
+npx blog-engine dev --theme=orbital
+npx blog-engine dev --theme=scholar
 ```
 
 主题目录包含 `theme.json`、`theme.ts`、`layouts/`、`assets/`、`i18n/`。新增主题的接口说明见 [docs/theming.md](docs/theming.md)，三套主题的截图见 [docs/theme-gallery.md](docs/theme-gallery.md)。
@@ -137,10 +184,10 @@ npm run dev -- --theme=scholar
 
 构建系统仓库不部署自身。部署工作流是 `templates/deploy.yml`，由博客仓库复制后使用。
 
-1. 从 `blog-engine` 模板创建博客仓库（或用 “Use this template”）。
+1. 创建博客仓库，`npm install github:dx3906999/blog-engine`，放好 `content/`、`site.config.ts` 和 `public/`。
 2. 把 `templates/deploy.yml` 复制到博客仓库的 `.github/workflows/deploy.yml`。
 3. Settings → Pages → Build and deployment → Source 选择 **GitHub Actions**。
-4. 推送博客仓库的 `main`；工作流会完成校验、构建、Pagefind、上传 artifact 和部署。
+4. 推送博客仓库的 `main`；工作流会完成主题检查、构建、Pagefind、上传 artifact 和部署。
 5. 部署后运行 smoke test，检查中英文首页、feed、sitemap、404 和搜索索引。
 
 项目页部署时，站点根是 `https://<user>.github.io/<repo>/`。`actions/configure-pages` 会注入 `origin` 和 `base_path`，不需要在配置里写仓库名。
@@ -162,18 +209,30 @@ GitHub Pages 没有服务端重定向和自定义响应头；站点总大小限�
 
 ## 目录
 
+构建系统仓库：
+
 ```
-content/            文章和页面
-themes/             folio / orbital / scholar
+themes/             folio / orbital / scholar（随包发布）
 src/core/           配置、扫描、Markdown、路由、渲染、输出
 src/theme/          主题 API、加载器、资源、i18n
-src/cli/            build / dev / preview / new / clean
-src/assets/         核心提供的搜索脚本
-scripts/            setup、链接/SEO/主题/确定性检查、smoke test
+src/cli/            bin 子命令、检查、Pagefind、开发服务器
+src/assets/         search.js（随包发布）
+scripts/            包构建时复制主题资源和 search.js
 tests/              单元和集成测试
 docs/               计划、架构、写作、主题、部署、设计检查
-public/             favicon 等静态资源
+content/            演示站点（不随包发布）
+site.config.ts      演示配置（不随包发布）
+templates/deploy.yml 博客仓库部署模板
+```
+
+博客仓库：
+
+```
+content/            文章和页面
+public/             favicon、CNAME 等
 site.config.ts      站点配置
+package.json        依赖 blog-engine
+.github/workflows/deploy.yml
 ```
 
 ## 设计原则

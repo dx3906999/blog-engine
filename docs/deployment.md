@@ -6,7 +6,7 @@
 
 ## 首次部署
 
-1. 从 `blog-engine` 模板创建博客仓库并推送 `main`。免费计划下仓库必须是 public。
+1. 创建博客仓库，安装 `blog-engine` 依赖，放好 `content/`、`site.config.ts`、`public/`。免费计划下仓库必须是 public。
 2. 把 `templates/deploy.yml` 复制到博客仓库的 `.github/workflows/deploy.yml`。
 3. 打开 Settings → Pages → Build and deployment → Source，选择 **GitHub Actions**。
 4. 推送一次提交，或在 Actions 里手动运行 **Deploy**。
@@ -16,15 +16,15 @@
 
 ```
 npm ci
-npm run verify
-npm run check:theme -- themes/folio themes/orbital themes/scholar
+npx --no-install blog-engine check:theme
 actions/configure-pages
-npm run build        # 注入 SITE_URL / SITE_BASE / SITE_ENV=production
-npm run check:output
-npm run index        # Pagefind
+npx --no-install blog-engine build   # 注入 SITE_URL / SITE_BASE / SITE_ENV=production
+npx --no-install blog-engine check:links
+npx --no-install blog-engine check:seo
+npx --no-install blog-engine index   # Pagefind
 actions/upload-pages-artifact
 actions/deploy-pages
-node scripts/smoke.ts
+npx --no-install blog-engine smoke
 ```
 
 ## 项目页与用户页
@@ -34,15 +34,15 @@ node scripts/smoke.ts
 - 本地模拟项目页：
 
 ```bash
-npm run build -- --base=/my-blog/
-npm run preview -- --base=/my-blog/
+npx blog-engine build --base=/my-blog/
+npx blog-engine preview --base=/my-blog/
 ```
 
 Windows Git Bash 会把 `/my-blog/` 当成路径转换。加 `MSYS_NO_PATHCONV=1`：
 
 ```bash
-MSYS_NO_PATHCONV=1 npm run build -- --base=/my-blog/
-MSYS_NO_PATHCONV=1 npm run preview -- --base=/my-blog/
+MSYS_NO_PATHCONV=1 npx blog-engine build --base=/my-blog/
+MSYS_NO_PATHCONV=1 npx blog-engine preview --base=/my-blog/
 ```
 
 如果资源 404，先检查 `base`。站点里所有内部 URL 都应该经过 helper，主题不应手写 `/assets/...`。
@@ -85,7 +85,7 @@ site: {
 - URL 大小写敏感，slug 和资源名统一小写。
 - HTML 有 CDN 缓存，发布后可能有约 10 分钟延迟；资源用内容哈希避开旧缓存。
 - 私有仓库的 Pages 需要付费计划。
-- Pages 不支持 PR 预览；预览用 `npm run preview`。
+- Pages 不支持 PR 预览；预览用 `npx blog-engine preview`。
 
 ## 回滚
 
@@ -102,7 +102,7 @@ site: {
 
 **搜索页没有结果**
 
-Pagefind 索引没有生成。部署流程必须执行 `npm run index`；检查 `dist/pagefind/pagefind.js` 是否存在。
+Pagefind 索引没有生成。部署流程必须执行 `npx blog-engine index`；检查 `dist/pagefind/pagefind.js` 是否存在。
 
 **中文标签页 404**
 

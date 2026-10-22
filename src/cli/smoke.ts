@@ -26,7 +26,7 @@ async function retryFetch(url: string, attempts = 8): Promise<Response> {
   throw lastError
 }
 
-async function main(): Promise<void> {
+export async function runSmoke(): Promise<void> {
   const base = process.env.BASE_URL
   if (!base) throw new Error('BASE_URL is required')
   const rootUrl = base.endsWith('/') ? base : `${base}/`
@@ -78,8 +78,3 @@ async function main(): Promise<void> {
   }
   console.log(`smoke test: ${rootUrl}`)
 }
-
-main().catch((error: unknown) => {
-  console.error(error)
-  process.exit(1)
-})

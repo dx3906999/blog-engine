@@ -8,6 +8,7 @@ dist/
 .test-dist/
 .cache/
 coverage/
+*.tgz
 *.log
 .DS_Store
 Thumbs.db

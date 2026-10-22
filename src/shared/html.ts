@@ -1,4 +1,4 @@
-const SAFE_HTML = Symbol('safe-html')
+const SAFE_HTML = Symbol.for('blog-engine.safe-html')
 
 export interface SafeHtml {
   readonly [SAFE_HTML]: true

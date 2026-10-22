@@ -1,4 +1,4 @@
-import { html, raw, type SafeHtml, type ThemeContext } from 'blog-engine/theme'
+import { html, raw, type SafeHtml, type ThemeContext } from '../../../src/theme/api.ts'
 import { getFolioConfig } from '../config.ts'
 
 function homeUrl(ctx: ThemeContext): string {

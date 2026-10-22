@@ -1,4 +1,4 @@
-import { defineConfig } from './src/core/config.ts'
+import { defineConfig } from 'blog-engine/config'
 
 /**
  * Copy this file to site.config.ts, or run `npm run setup`.

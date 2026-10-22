@@ -1,5 +1,5 @@
-import { defineTheme } from 'blog-engine/theme'
 import { z } from 'zod'
+import { defineTheme } from '../../src/theme/api.ts'
 import { archive } from './layouts/archive.ts'
 import { index } from './layouts/index.ts'
 import { notFound } from './layouts/notFound.ts'
