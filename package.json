@@ -1,0 +1,68 @@
+{
+  "name": "blog-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A configurable static blog engine with swappable themes.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    "./theme": "./src/theme/api.ts",
+    "./config": "./src/core/config.ts"
+  },
+  "scripts": {
+    "dev": "node src/cli/dev.ts",
+    "build": "node src/cli/build.ts",
+    "preview": "node src/cli/preview.ts",
+    "new": "node src/cli/new.ts",
+    "clean": "node src/cli/clean.ts",
+    "setup": "node scripts/setup.ts",
+    "index": "pagefind --site dist --output-subdir pagefind --exclude-selectors \"pre, .katex\"",
+    "build:finish": "npm run check:output && npm run index",
+    "build:all": "npm run build && npm run build:finish",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check:links": "node scripts/check-links.ts",
+    "check:seo": "node scripts/check-seo.ts",
+    "check:output": "npm run check:links && npm run check:seo",
+    "check:theme": "node scripts/check-theme.ts",
+    "check:deterministic": "node scripts/check-deterministic.ts",
+    "verify": "npm run lint && npm run typecheck && npm run test",
+    "check": "npm run verify && npm run build && npm run check:output && npm run check:theme && npm run index"
+  },
+  "dependencies": {
+    "@shikijs/rehype": "^4.5.0",
+    "chokidar": "^6.0.0",
+    "hast-util-to-text": "^4.0.2",
+    "katex": "^0.19.0",
+    "rehype-autolink-headings": "^7.1.0",
+    "rehype-katex": "^7.0.1",
+    "rehype-raw": "^7.0.0",
+    "rehype-sanitize": "^6.0.0",
+    "rehype-slug": "^6.0.0",
+    "rehype-stringify": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "shiki": "^4.5.0",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.1.0",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.2",
+    "@types/node": "^26.6.5",
+    "cheerio": "^1.2.0",
+    "fast-xml-parser": "^5.11.2",
+    "pagefind": "^1.5.2",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.12"
+  }
+}

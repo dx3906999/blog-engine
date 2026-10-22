@@ -1,0 +1,111 @@
+import { html, type Post, type ThemeContext } from 'blog-engine/theme'
+import { getFolioConfig } from '../config.ts'
+
+export function postMeta(ctx: ThemeContext, post: Post) {
+  const config = getFolioConfig(ctx)
+  return html`<p class="post-meta">
+    <time datetime="${post.date}">${ctx.helpers.date(post.date)}</time>
+    ${
+      config.showReadingTime
+        ? html`<span aria-hidden="true"> · </span><span>${post.readingMinutes} ${ctx.i18n.t('post.minutes')}</span>`
+        : ''
+    }
+  </p>`
+}
+
+export function tagLinks(ctx: ThemeContext, tags: string[]) {
+  if (tags.length === 0) return html``
+  return html`<ul class="tag-list" aria-label="${ctx.i18n.t('post.tags')}">
+    ${tags.map((tag) => html`<li><a href="${ctx.helpers.tagUrlByName(tag)}">#${tag}</a></li>`)}
+  </ul>`
+}
+
+export function postList(ctx: ThemeContext, posts: Post[]) {
+  if (posts.length === 0) return html`<p class="empty">${ctx.i18n.t('post.empty')}</p>`
+  return html`<ol class="post-list">
+    ${posts.map(
+      (post) => html`<li class="post-item">
+        ${postMeta(ctx, post)}
+        <h2 class="post-title"><a href="${ctx.helpers.postUrl(post)}">${post.title}</a></h2>
+        <p class="post-summary">${post.summary}</p>
+        ${tagLinks(ctx, post.tags)}
+      </li>`,
+    )}
+  </ol>`
+}
+
+export function pagination(ctx: ThemeContext) {
+  const pagination = ctx.pagination
+  if (!pagination || pagination.total <= 1) return html``
+  return html`<nav class="pagination" aria-label="${ctx.i18n.t('paginator.label')}">
+    ${
+      pagination.prevUrl
+        ? html`<a rel="prev" href="${ctx.helpers.url(pagination.prevUrl)}">← ${ctx.i18n.t('paginator.prev')}</a>`
+        : html`<span></span>`
+    }
+    <span class="pagination-pages">
+      ${pagination.pages.map((page) =>
+        page.n === pagination.current
+          ? html`<span aria-current="page">${page.n}</span>`
+          : html`<a href="${ctx.helpers.url(page.url)}">${page.n}</a>`,
+      )}
+    </span>
+    ${
+      pagination.nextUrl
+        ? html`<a rel="next" href="${ctx.helpers.url(pagination.nextUrl)}">${ctx.i18n.t('paginator.next')} →</a>`
+        : html`<span></span>`
+    }
+  </nav>`
+}
+
+export function prevNext(ctx: ThemeContext) {
+  const post = ctx.post
+  if (!post) return html``
+  return html`<nav class="prev-next" aria-label="${ctx.i18n.t('post.toc')}">
+    ${
+      post.prev
+        ? html`<a rel="prev" href="${ctx.helpers.postUrl(post.prev)}"><span>${ctx.i18n.t('post.prev')}</span>${post.prev.title}</a>`
+        : html`<span></span>`
+    }
+    ${
+      post.next
+        ? html`<a rel="next" href="${ctx.helpers.postUrl(post.next)}"><span>${ctx.i18n.t('post.next')}</span>${post.next.title}</a>`
+        : html`<span></span>`
+    }
+  </nav>`
+}
+
+export function tagCloud(ctx: ThemeContext) {
+  const tags = ctx.tags ?? []
+  if (tags.length === 0) return html`<p class="empty">${ctx.i18n.t('tag.empty')}</p>`
+  return html`<ul class="tag-cloud">
+    ${tags.map(
+      (tag) => html`<li>
+        <a href="${ctx.helpers.tagUrl(tag)}">${tag.name}<span>${tag.count}</span></a>
+      </li>`,
+    )}
+  </ul>`
+}
+
+export function archiveList(ctx: ThemeContext) {
+  const archives = ctx.archives ?? []
+  return html`<div class="archive-list">
+    ${archives.map(
+      (group) => html`<section class="archive-year">
+        <h2><a href="${ctx.helpers.url(`/archives/${group.year}/`)}">${group.year}</a><span>${group.posts.length}</span></h2>
+        ${postList(ctx, group.posts)}
+      </section>`,
+    )}
+  </div>`
+}
+
+export function pageHeader(ctx: ThemeContext, extra?: { count?: number }) {
+  return html`<header class="page-header">
+    <h1>${ctx.page.title}</h1>
+    ${
+      extra?.count !== undefined
+        ? html`<p class="page-subtitle">${ctx.i18n.t('page.tagPosts', { count: extra.count })}</p>`
+        : ''
+    }
+  </header>`
+}

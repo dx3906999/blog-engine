@@ -1,0 +1,55 @@
+nav:
+  label: 主导航
+  home: 首页
+  archives: 归档
+  tags: 标签
+  about: 关于
+  search: 搜索
+page:
+  indexLabel: 目录
+  article: 文章
+  pageLabel: 页面
+  abstract: 摘要
+  keywords: 关键词
+  indexTerms: 主题索引
+  tags: 标签
+  archives: 归档
+  search: 搜索
+  notFound: 页面不存在
+  notFoundBody: 这个地址没有对应的页面。可能是链接过期，或文章被移动了。
+  pageOf: 第 {n} 页
+  tagPosts: 共 {count} 篇
+post:
+  toc: 目录
+  prev: 上一篇
+  next: 下一篇
+  minutes: 分钟
+  tags: 标签
+  empty: 还没有文章。
+  backHome: 返回首页
+paginator:
+  prev: 上一页
+  next: 下一页
+  page: 第 {n} 页
+  label: 分页
+toc:
+  title: 目录
+theme:
+  toggle: 切换明暗
+footer:
+  license: 许可证
+  source: 查看源码
+  rss: RSS
+language:
+  switch: 语言
+search:
+  placeholder: 搜索标题、摘要和正文
+  loading: 正在搜索...
+  empty: 没有找到结果。
+  error: 搜索索引尚未生成，或加载失败。
+  results: 找到 {n} 条结果
+  noscript: 搜索需要 JavaScript。
+a11y:
+  skip: 跳到正文
+tag:
+  empty: 还没有标签。

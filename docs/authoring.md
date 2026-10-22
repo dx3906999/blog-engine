@@ -1,0 +1,95 @@
+# 写作
+
+## 目录
+
+文章按语言分目录，每篇文章一个文件夹：
+
+```
+content/
+  zh/
+    posts/how-this-site-works/
+      index.md
+      cover.jpg
+    pages/about.md
+  en/
+    posts/how-this-site-works/
+      index.md
+    pages/about.md
+```
+
+`index.md` 是文章正文，同目录的图片会被复制到文章输出目录。Markdown 里直接写 `![alt](./cover.jpg)` 即可。
+
+## Frontmatter
+
+```yaml
+---
+title: 标题
+date: 2026-10-22T10:00:00+08:00
+updated: 2026-10-23T09:00:00+08:00
+tags: [工程, 静态站点]
+slug: how-this-site-works
+translationKey: how-this-site-works
+summary: 可选的摘要
+draft: false
+---
+```
+
+| 字段 | 必填 | 说明 |
+| --- | --- | --- |
+| `title` | 是 | 文章标题 |
+| `date` | 是 | ISO 8601，必须带时区偏移 |
+| `updated` | 否 | 更新时间，格式同上 |
+| `tags` | 否 | 字符串数组 |
+| `slug` | 否 | 默认取目录名；小写 ASCII、数字、连字符 |
+| `translationKey` | 否 | 译文关联键，默认等于 slug |
+| `summary` | 否 | 摘要；缺省从正文第一段提取 |
+| `draft` | 否 | `true` 时只在开发模式出现 |
+
+页面（`pages/`）的 frontmatter 用 `description` 代替 `summary`，`date` 可选。
+
+## 规则
+
+- `date` 不带时区会直接构建失败。不要写 `2026-10-22`，写 `2026-10-22T10:00:00+08:00`。
+- 文章和页面的 slug 只用 `a-z0-9-`；中文标题请显式给 slug。
+- 同一语言内 slug 和 `translationKey` 都不能重复。
+- 标签可以是中文，URL 会被百分号编码；改名会改变标签页 URL。
+- 没有译文的文章只出现在自己语言的首页、归档、feed 和搜索里。
+- 草稿在生产构建中排除；未来日期的文章默认也排除，`npm run build -- --future` 可以包含。
+- 原始 HTML 默认关闭。需要时在 `site.config.ts` 加 `markdown: { allowHtml: true }`，构建会走 sanitize。
+- 所有内部链接用站点路径；项目页部署时构建会加 `base`。不要手写完整 `https://` 链接指向站内页面。
+
+## 新建文章
+
+```bash
+npm run new -- "这个站点是怎么搭起来的" --slug how-this-site-works --lang zh --tags 工程,静态站点
+```
+
+命令会创建：
+
+```
+content/zh/posts/how-this-site-works/index.md
+```
+
+`--draft` 创建草稿，`--date` 覆盖日期，`--translation-key` 覆盖译文键。创建英文译文时用相同的 slug 和 `translationKey`，目录换成 `en`。
+
+## 标题、代码和公式
+
+- 标题按 `##`、`###` 使用，构建时自动生成锚点和目录。
+- 代码块用围栏语法，构建时用 Shiki 高亮；代码和公式不会进入搜索索引。
+- 行内公式：`$E = mc^2$`
+- 块级公式：
+
+```markdown
+$$
+\int_{0}^{1} x^2 \, dx = \frac{1}{3}
+$$
+```
+
+- 表格、任务列表、脚注由 GFM 处理。
+- 需要原始 HTML 时优先写成 Markdown；非必要不要打开 raw HTML。
+
+## 示例内容
+
+`content/` 里的文章和页面是示例。替换成自己的内容时，可以直接删除 `content/zh/posts/`、`content/en/posts/` 下的示例目录，保留 `pages/about.md` 或改写它。
+
+`content/README.md` 有同样的说明。

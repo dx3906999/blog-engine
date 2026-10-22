@@ -1,0 +1,119 @@
+# 部署
+
+目标平台是 GitHub Pages。构建和部署都在 GitHub Actions 里完成，不提交 `dist/`。
+
+## 首次部署
+
+1. 创建仓库并推送 `main`。免费计划下仓库必须是 public。
+2. 打开 Settings → Pages → Build and deployment → Source，选择 **GitHub Actions**。
+3. 确认 `.github/workflows/deploy.yml` 在 `main` 上。
+4. 推送一次提交，或在 Actions 里手动运行 **Deploy**。
+5. 部署完成后打开 `https://<user>.github.io/<repo>/`。
+
+`deploy.yml` 的流程：
+
+```
+npm ci
+npm run verify
+npm run check:theme -- themes/folio themes/orbital themes/scholar
+actions/configure-pages
+npm run build        # 注入 SITE_URL / SITE_BASE / SITE_ENV=production
+npm run check:output
+npm run index        # Pagefind
+actions/upload-pages-artifact
+actions/deploy-pages
+node scripts/smoke.ts
+```
+
+## 项目页与用户页
+
+- 用户页/组织页：仓库名是 `<user>.github.io`，站点根是 `/`。
+- 项目页：站点根是 `/<repo>/`。`actions/configure-pages` 提供 `origin` 和 `base_path`，工作流注入 `SITE_URL` / `SITE_BASE`。
+- 本地模拟项目页：
+
+```bash
+npm run build -- --base=/my-blog/
+npm run preview -- --base=/my-blog/
+```
+
+Windows Git Bash 会把 `/my-blog/` 当成路径转换。加 `MSYS_NO_PATHCONV=1`：
+
+```bash
+MSYS_NO_PATHCONV=1 npm run build -- --base=/my-blog/
+MSYS_NO_PATHCONV=1 npm run preview -- --base=/my-blog/
+```
+
+如果资源 404，先检查 `base`。站点里所有内部 URL 都应该经过 helper，主题不应手写 `/assets/...`。
+
+## 自定义域名
+
+1. 在 `site.config.ts` 设置：
+
+```ts
+site: {
+  url: 'https://blog.example.com',
+  base: '/',
+  customDomain: 'blog.example.com',
+}
+```
+
+2. 构建会生成 `dist/CNAME`。
+3. 在仓库 Settings → Pages → Custom domain 填写 `blog.example.com`。
+4. DNS：子域名 CNAME 到 `<user>.github.io`；根域名使用 GitHub Pages 的 A/AAAA 记录。
+5. 等待 DNS 检查通过，开启 Enforce HTTPS。证书签发可能需要一段时间。
+
+不要把 `www` 和非 `www` 同时作为 canonical；选一个，另一个做跳转或只做 DNS 重定向。
+
+## 发布产物要求
+
+- `dist/index.html`
+- `dist/404.html`
+- `dist/.nojekyll`
+- `dist/sitemap.xml`
+- `dist/robots.txt`
+- `dist/atom.xml` 和 `dist/en/atom.xml`
+- `dist/pagefind/pagefind.js`
+
+`.nojekyll` 必须存在，否则下划线开头的文件会被 Jekyll 忽略。构建和 `copyPublicAssets` 会保证它存在。
+
+## GitHub Pages 限制
+
+- 站点大小 1 GB，带宽 100 GB/月，构建频率 10 次/小时的软限制。
+- 没有服务端重定向、没有自定义响应头、没有动态路由。
+- URL 大小写敏感，slug 和资源名统一小写。
+- HTML 有 CDN 缓存，发布后可能有约 10 分钟延迟；资源用内容哈希避开旧缓存。
+- 私有仓库的 Pages 需要付费计划。
+- Pages 不支持 PR 预览；预览用 `npm run preview`。
+
+## 回滚
+
+- 每次部署对应一个 commit，Pages 保留部署历史。
+- 在 Actions 里重新运行旧 commit 的 **Deploy**，或使用 Pages 的部署历史回滚。
+- 重要版本打 tag，回滚时从 tag 触发 `workflow_dispatch`。
+- smoke test 失败时不要继续发布。
+
+## 常见故障
+
+**首页 200，但 CSS/JS 404**
+
+`base` 不对。项目页需要 `/repo/`；确认 CI 注入了 `SITE_BASE`，或本地用 `--base`。
+
+**搜索页没有结果**
+
+Pagefind 索引没有生成。部署流程必须执行 `npm run index`；检查 `dist/pagefind/pagefind.js` 是否存在。
+
+**中文标签页 404**
+
+标签 URL 是百分号编码，输出目录是 Unicode。检查 `scripts/check-links.ts` 是否通过。不要在标签名里使用 `/` 或文件系统保留字符。
+
+**自定义域名证书一直未签发**
+
+DNS 还没生效，或域名被其他 Pages 站点占用。先确认 CNAME/A 记录，再等待重新签发。
+
+**仓库改名后旧链接失效**
+
+项目页的 base 变了。绑定自定义域名，或保留旧路径的静态重定向页。
+
+**Pages Source 还是 "Deploy from a branch"**
+
+改成 **GitHub Actions**。`deploy-pages` 需要这个设置，且工作流需要 `pages: write` 和 `id-token: write`。

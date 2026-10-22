@@ -1,0 +1,55 @@
+nav:
+  label: Primary
+  home: Home
+  archives: Archive
+  tags: Tags
+  about: About
+  search: Search
+page:
+  indexLabel: Index
+  pageLabel: Page
+  tags: Tags
+  archives: Archive
+  search: Search
+  notFound: Not found
+  notFoundBody: There is no page at this address. The link may be outdated or the post may have moved.
+  pageOf: Page {n}
+  tagPosts: '{count} posts'
+post:
+  toc: Contents
+  prev: Previous
+  next: Next
+  minutes: min
+  tags: Tags
+  empty: No posts yet.
+  backHome: Back to home
+  entry: Entry
+  date: Date
+  read: Read
+paginator:
+  prev: Previous
+  next: Next
+  page: Page {n}
+  label: Pagination
+toc:
+  title: Contents
+theme:
+  toggle: Toggle theme
+footer:
+  license: License
+  source: Source
+  rss: RSS
+language:
+  switch: Language
+search:
+  placeholder: Enter a query
+  loading: Searching...
+  empty: No results.
+  error: The search index is missing or failed to load.
+  results: '{n} results'
+  noscript: Search requires JavaScript.
+  query: Query
+a11y:
+  skip: Skip to content
+tag:
+  empty: No tags yet.

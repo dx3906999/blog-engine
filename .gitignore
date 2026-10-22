@@ -1,0 +1,17 @@
+node_modules/
+.dide/
+dist/
+.dev-dist/
+.build-tmp/
+.theme-check/
+.determinism/
+.test-dist/
+.cache/
+coverage/
+*.log
+.DS_Store
+Thumbs.db
+site.config.ts.bak
+.env
+.env.*
+!.env.example
